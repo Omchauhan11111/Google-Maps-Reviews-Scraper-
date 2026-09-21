@@ -309,19 +309,27 @@ def scroll_and_extract_reviews(driver: webdriver.Chrome, expected: int, progress
         if new_items > 0:
             unchanged = 0
             if progress_callback:
-                progress_callback(len(all_reviews), expected)
+                progress_callback(len(all_reviews), expected, f"Extracted {len(all_reviews)} / {expected or 'all'} reviews...")
         else:
             unchanged += 1
 
         if expected and len(all_reviews) >= expected:
             break
 
+        # If zero reviews found after 4 attempts and no cards exist on page, exit early
+        if len(all_reviews) == 0 and unchanged >= 4:
+            has_cards = driver.execute_script("return document.querySelectorAll('div.jftiEf').length > 0;")
+            if not has_cards:
+                if progress_callback:
+                    progress_callback(0, expected, "No public reviews found for this listing.")
+                break
+
         if unchanged >= max_unchanged:
             # Check if loading spinner is still spinning
             is_loading = driver.execute_script("""
                 return Boolean(document.querySelector('.q67rwe, .m6QErb .loading, div[aria-label*="Loading"]'));
             """)
-            if not is_loading or unchanged >= (max_unchanged + 6):
+            if not is_loading or unchanged >= (max_unchanged + 4):
                 break
 
         # Scroll down
@@ -347,16 +355,26 @@ def scroll_and_extract_reviews(driver: webdriver.Chrome, expected: int, progress
     return all_reviews
 
 
-def scrape_place(driver: webdriver.Chrome, company: str, location: str, progress_callback=None) -> tuple[dict[str, str], list[dict[str, str]]]:
+def scrape_place(driver: webdriver.Chrome, company: str, location: str, status_callback=None, progress_callback=None) -> tuple[dict[str, str], list[dict[str, str]]]:
+    if status_callback:
+        status_callback(f"Searching Google Maps for '{company}'...")
     query = f"{company}, {location}" if location else company
     driver.get(f"https://www.google.com/maps/search/?api=1&query={quote_plus(query)}")
-    time.sleep(4)
+    time.sleep(3.5)
     select_search_result(driver)
     title = first_text(driver, ["h1.DUwDvf", "h1"])
     address = clean_address(first_text(driver, ["button[data-item-id='address']", "button[aria-label*='Address']"]))
+    
+    if status_callback:
+        status_callback(f"Found listing: {title or company}. Opening reviews tab...")
     open_reviews(driver)
     sort_by_newest(driver)
     expected = review_total(driver)
+    
+    if status_callback:
+        count_str = f"({expected} reviews expected)" if expected else ""
+        status_callback(f"Extracting reviews for {title or company} {count_str}...")
+        
     reviews = scroll_and_extract_reviews(driver, expected, progress_callback=progress_callback)
     place = {
         "company": title or company,
@@ -382,7 +400,7 @@ def run_job(job_id: str, rows: list[dict[str, str]], company_column: str, locati
                 inputs.append((company, location))
         if not inputs:
             raise ValueError("No valid company names were found.")
-        update_job(job_id, status="running", message="Opening local Chrome and loading Google Maps reviews.")
+        update_job(job_id, status="running", message="Opening Chrome engine and connecting to Google Maps...")
         driver = chrome_driver(CHROME_PROFILE_DIR)
         total_reviews = 0
         matched = 0
@@ -391,12 +409,14 @@ def run_job(job_id: str, rows: list[dict[str, str]], company_column: str, locati
             writer = csv.DictWriter(file, fieldnames=OUTPUT_COLUMNS)
             writer.writeheader()
             for index, (company, location) in enumerate(inputs, start=1):
-                def on_progress(count: int, target: int):
-                    target_str = f" / {target}" if target else ""
-                    update_job(job_id, message=f"Scraping {index} of {len(inputs)}: {company} ({count}{target_str} reviews)")
+                def on_status(msg: str):
+                    update_job(job_id, message=f"[{index}/{len(inputs)}] {msg}", matched=matched, reviews=total_reviews)
 
-                update_job(job_id, message=f"Scraping {index} of {len(inputs)}: {company}")
-                place, reviews = scrape_place(driver, company, location, progress_callback=on_progress)
+                def on_progress(count: int, target: int, detail: str = ""):
+                    target_str = f" / {target}" if target else ""
+                    update_job(job_id, message=f"[{index}/{len(inputs)}] {company}: {count}{target_str} reviews extracted", matched=matched, reviews=total_reviews + count)
+
+                place, reviews = scrape_place(driver, company, location, status_callback=on_status, progress_callback=on_progress)
                 if place["company"]:
                     matched += 1
                 expected = int(place["google_review_count"] or 0)
@@ -407,6 +427,8 @@ def run_job(job_id: str, rows: list[dict[str, str]], company_column: str, locati
                 for review in reviews:
                     writer.writerow({**place, **review})
                 total_reviews += len(reviews)
+                update_job(job_id, matched=matched, reviews=total_reviews)
+
         message = "Scraping complete."
         if incomplete:
             message = f"Scraping complete with {incomplete} incomplete company result(s). Google did not render every public review in Chrome."
