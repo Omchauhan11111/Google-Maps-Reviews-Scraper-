@@ -103,7 +103,7 @@ async function poll() {
   resetControls();
 
   if (job.status === 'complete') {
-    progress.style.background = '#9ddb41';
+    progress.style.background = '#10b981';
     reviewsDownload.href = job.download;
     reviewsDownload.hidden = false;
     renderPreview(activeJob, job.download);
