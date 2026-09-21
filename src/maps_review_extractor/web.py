@@ -82,10 +82,12 @@ def update_job(job_id: str, **values: object) -> None:
 
 def chrome_driver(profile_dir: Path) -> webdriver.Chrome:
     options = Options()
-    if profile_dir:
+    if profile_dir and os.name == "nt":
         options.add_argument(f"--user-data-dir={profile_dir}")
     options.add_argument("--start-maximized")
     options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_argument("--lang=en-US")
+    options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
     options.add_experimental_option("useAutomationExtension", False)
 
@@ -112,19 +114,49 @@ def first_text(driver: webdriver.Chrome, selectors: list[str]) -> str:
     return ""
 
 
+def dismiss_dialogs(driver: webdriver.Chrome) -> None:
+    try:
+        driver.execute_script("""
+            const buttons = Array.from(document.querySelectorAll('button, div[role="button"], input[type="submit"], form button'));
+            const target = buttons.find(b => {
+                const txt = (b.innerText || b.getAttribute('aria-label') || b.value || '').toLowerCase().trim();
+                return txt === 'dismiss' || 
+                       txt === 'stay signed out' || 
+                       txt === 'reject all' || 
+                       txt === 'accept all' || 
+                       txt === 'i agree' || 
+                       txt === 'agree' || 
+                       txt === 'not now' ||
+                       txt.includes('accept all') ||
+                       txt.includes('reject all') ||
+                       txt.includes('stay signed out');
+            });
+            if (target) {
+                try { target.click(); } catch(e) {}
+            }
+        """)
+    except Exception:
+        pass
+
+
 def select_search_result(driver: webdriver.Chrome) -> None:
-    """Open the first Maps result when a name/location query returns a list."""
+    """Open the best Maps result when a name/location query returns a list."""
+    dismiss_dialogs(driver)
+    time.sleep(1)
     title = first_text(driver, ["h1.DUwDvf", "h1"])
-    if title and normalize(title) != "results":
+    if title and normalize(title) != "results" and not title.lower().startswith("search results"):
         return
-    for result in driver.find_elements(By.CSS_SELECTOR, ".Nv2PK a.hfpxzc, a.hfpxzc[href*='/place/']"):
-        if not result.is_displayed():
-            continue
-        href = result.get_attribute("href")
-        if not href:
-            continue
-        driver.get(href)
-        for _ in range(12):
+
+    results = driver.find_elements(By.CSS_SELECTOR, ".Nv2PK a.hfpxzc, a.hfpxzc[href*='/place/'], div.Nv2PK")
+    if results:
+        target = results[0]
+        link = target.find_element(By.CSS_SELECTOR, "a.hfpxzc") if target.tag_name != "a" else target
+        href = link.get_attribute("href")
+        if href:
+            driver.get(href)
+        else:
+            driver.execute_script("arguments[0].click();", link)
+        for _ in range(15):
             time.sleep(0.5)
             title = first_text(driver, ["h1.DUwDvf", "h1"])
             if title and normalize(title) != "results":
@@ -144,20 +176,6 @@ def review_total(driver: webdriver.Chrome) -> int:
 
 def clean_address(addr: str) -> str:
     return re.sub(r"^[^\w\d]+", "", addr or "").strip()
-
-
-def dismiss_dialogs(driver: webdriver.Chrome) -> None:
-    try:
-        driver.execute_script("""
-            const buttons = Array.from(document.querySelectorAll('button, div[role="button"]'));
-            const target = buttons.find(b => {
-                const txt = (b.innerText || b.getAttribute('aria-label') || '').toLowerCase().trim();
-                return txt === 'dismiss' || txt === 'stay signed out' || txt === 'reject all' || txt === 'not now';
-            });
-            if (target) target.click();
-        """)
-    except Exception:
-        pass
 
 
 def click_more_reviews(driver: webdriver.Chrome) -> bool:
@@ -191,16 +209,42 @@ def sort_by_newest(driver: webdriver.Chrome) -> None:
 
 def open_reviews(driver: webdriver.Chrome) -> None:
     dismiss_dialogs(driver)
-    for selector in (".F7nice", "[aria-label*='reviews' i]", "[aria-label*='stars' i]"):
-        elements = driver.find_elements(By.CSS_SELECTOR, selector)
-        if elements:
+    time.sleep(1)
+
+    # 1. Click 'Reviews' tab by role / text / aria-label
+    tab_selectors = [
+        "//button[@role='tab'][contains(translate(., 'REVIEWS', 'reviews'), 'reviews')]",
+        "//button[contains(@aria-label, 'Reviews') or contains(@aria-label, 'reviews')]",
+        "//div[@role='tablist']//button[contains(., 'Reviews')]",
+        "//button[contains(., 'Reviews') and not(contains(., 'Write'))]",
+        "//button[contains(@data-tab-index, '1')]"
+    ]
+    for xpath in tab_selectors:
+        tabs = driver.find_elements(By.XPATH, xpath)
+        for tab in tabs:
             try:
-                driver.execute_script("arguments[0].click()", elements[0])
-                break
-            except WebDriverException:
+                driver.execute_script("arguments[0].click();", tab)
+                time.sleep(2)
+                dismiss_dialogs(driver)
+                if driver.find_elements(By.CSS_SELECTOR, "div.jftiEf, button[aria-label*='Sort']"):
+                    return
+            except Exception:
                 pass
-    time.sleep(2)
-    dismiss_dialogs(driver)
+
+    # 2. Click stars / review count button in header
+    for selector in (".F7nice", "button.F7nice", "[aria-label*='reviews' i]", "[aria-label*='stars' i]", "button.hh2c6"):
+        elements = driver.find_elements(By.CSS_SELECTOR, selector)
+        for element in elements:
+            try:
+                driver.execute_script("arguments[0].click()", element)
+                time.sleep(2)
+                dismiss_dialogs(driver)
+                if driver.find_elements(By.CSS_SELECTOR, "div.jftiEf, button[aria-label*='Sort']"):
+                    return
+            except Exception:
+                pass
+
+    # 3. Fallback: click "More reviews" text
     click_more_reviews(driver)
     time.sleep(2)
 
