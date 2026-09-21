@@ -1,0 +1,31 @@
+# Scrape outputs (may contain personal data; never commit)
+*.csv
+!examples/*.csv
+results-*.json
+out/
+output/
+gmaps-output/
+data/
+
+# Local upstream binary
+bin/
+
+# Python environment and caches
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+test_*.py
+
+# Secret and credentials
+.env
+.env.*
+*.pem
+*.key
+
+# Editor and AI tooling
+.claude/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

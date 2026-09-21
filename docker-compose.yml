@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  maps-scraper:
+    build: .
+    container_name: google-maps-scraper
+    ports:
+      - "5000:5000"
+    environment:
+      - HEADLESS=true
+      - PORT=5000
+    volumes:
+      # Persist scraped output and session profile
+      - ./data:/app/data
+    restart: unless-stopped
+    shm_size: '2gb'

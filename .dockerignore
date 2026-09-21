@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.git/
+.gitignore
+.claude/
+.pytest_cache/
+test_*.py
+data/
+*.csv
+!examples/*.csv

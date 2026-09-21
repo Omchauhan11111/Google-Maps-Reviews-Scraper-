@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Maps Review Extractor</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Maps Review Extractor</div>
+    <span class="engine ready"><i></i>Local Chrome</span>
+  </header>
+  <main>
+    <h1>Google Maps reviews</h1>
+    <p class="intro">Search one company or upload a CSV/Excel file for bulk review extraction.</p>
+    <section class="app-shell">
+      <form id="job-form">
+        <div class="tabs" role="tablist">
+          <button class="tab active" type="button" data-mode="single">Single company</button>
+          <button class="tab" type="button" data-mode="bulk">Bulk upload</button>
+        </div>
+        <div id="single-mode" class="mode-panel">
+          <label>Company name
+            <input id="company" name="company" placeholder="e.g. Ascentium" autocomplete="organization">
+          </label>
+          <label>Location <span>optional</span>
+            <input name="location" placeholder="e.g. Singapore 049315" autocomplete="street-address">
+          </label>
+        </div>
+        <div id="bulk-mode" class="mode-panel" hidden>
+          <label class="dropzone" id="dropzone" for="file">
+            <input id="file" name="file" type="file" accept=".csv,.xlsx">
+            <strong id="file-label">Choose CSV or Excel file</strong>
+            <small>Columns: <code>company</code> required, <code>location</code> optional</small>
+          </label>
+        </div>
+        <div class="actions">
+          <button type="submit" id="start">Scrape reviews</button>
+        </div>
+      </form>
+      <aside class="status-panel">
+        <div class="status-line"><span>Status</span><strong id="status">Ready</strong></div>
+        <div class="progress"><span id="progress"></span></div>
+        <p id="message">Chrome opens locally while reviews are being collected.</p>
+        <div class="counts">
+          <div><span>Companies</span><strong id="rows">-</strong></div>
+          <div><span>Matched</span><strong id="matched">-</strong></div>
+          <div><span>Reviews</span><strong id="reviews">-</strong></div>
+        </div>
+        <p id="incomplete" class="incomplete" hidden></p>
+        <a id="reviews-download" class="download" href="#" hidden>Download reviews CSV</a>
+      </aside>
+    </section>
+
+    <!-- Preview Section -->
+    <section id="preview-section" class="preview-section" hidden>
+      <div class="preview-header">
+        <div>
+          <h2 class="preview-title">Scraped Reviews Preview</h2>
+          <p id="preview-subtitle" class="preview-subtitle">Check the extracted reviews below before downloading</p>
+        </div>
+        <a id="preview-download" class="download preview-download-btn" href="#" hidden>Download reviews CSV</a>
+      </div>
+      <div class="preview-table-wrapper">
+        <table class="preview-table">
+          <thead>
+            <tr>
+              <th style="width: 45px;">#</th>
+              <th style="width: 140px;">Company</th>
+              <th style="width: 130px;">Reviewer</th>
+              <th style="width: 80px;">Rating</th>
+              <th style="width: 110px;">Date</th>
+              <th>Review Text</th>
+              <th>Owner Reply</th>
+            </tr>
+          </thead>
+          <tbody id="preview-tbody">
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="csv-fields">
+      <strong>CSV includes</strong>
+      <span>Company</span><span>Address</span><span>Match confidence</span><span>Google review count</span>
+      <span>Extracted reviews</span><span>Reviewer</span><span>Rating</span><span>Review</span><span>Date</span>
+      <span>Owner reply</span><span>Replied by</span><span>Reply date</span>
+    </section>
+  </main>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
