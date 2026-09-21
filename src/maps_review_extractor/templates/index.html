@@ -3,205 +3,76 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Google Maps Reviews Extractor — Professional Scraping Kit</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>Maps Review Extractor</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
 </head>
 <body>
-  <!-- Background Glow & Grid -->
-  <div class="bg-glow"></div>
-  <div class="bg-grid"></div>
-
-  <!-- Navigation Bar -->
-  <header class="navbar">
-    <div class="nav-container">
-      <div class="brand">
-        <div class="brand-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-            <circle cx="12" cy="10" r="3"></circle>
-          </svg>
-        </div>
-        <div class="brand-text">
-          <span class="brand-title">Maps Review Extractor</span>
-          <span class="brand-badge">PRO</span>
-        </div>
-      </div>
-
-      <div class="nav-actions">
-        <div class="engine-badge ready" id="engine-status">
-          <span class="pulse-dot"></span>
-          <span>Chrome Engine Ready</span>
-        </div>
-        <a href="https://github.com/Omchauhan11111/Google-Maps-Reviews-Scraper-" target="_blank" rel="noopener noreferrer" class="github-link" title="View Source on GitHub">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
-          </svg>
-          <span>GitHub</span>
-        </a>
-      </div>
-    </div>
+  <header class="topbar">
+    <div class="brand">Maps Review Extractor</div>
+    <span class="engine ready"><i></i>Local Chrome</span>
   </header>
-
-  <!-- Main Container -->
-  <main class="main-wrapper">
-    <!-- Hero Header -->
-    <div class="hero-section">
-      <div class="hero-pill">
-        <span class="pill-sparkle">✨</span>
-        <span>Deep Extraction & Live Data Preview</span>
-      </div>
-      <h1 class="hero-title">Google Maps Reviews Scraper</h1>
-      <p class="hero-subtitle">
-        Extract verified customer reviews, ratings, owner replies, and business metadata with instant CSV export and live table preview.
-      </p>
-
-      <div class="features-bar">
-        <div class="feat-item">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          <span>1,000+ Deep Scroll</span>
+  <main>
+    <h1>Google Maps reviews</h1>
+    <p class="intro">Search one company or upload a CSV/Excel file for bulk review extraction.</p>
+    <section class="app-shell">
+      <form id="job-form">
+        <div class="tabs" role="tablist">
+          <button class="tab active" type="button" data-mode="single">Single company</button>
+          <button class="tab" type="button" data-mode="bulk">Bulk upload</button>
         </div>
-        <div class="feat-item">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          <span>Owner Responses</span>
-        </div>
-        <div class="feat-item">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          <span>Bulk CSV & Excel</span>
-        </div>
-        <div class="feat-item">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          <span>Fuzzy Address Match</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Main App Console -->
-    <section class="app-console">
-      <!-- Input Configuration Form -->
-      <form id="job-form" class="form-card">
-        <div class="segment-tabs" role="tablist">
-          <button class="tab active" type="button" data-mode="single">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16"></path><path d="M9 21V9"></path><path d="M15 21v-8"></path></svg>
-            <span>Single Company</span>
-          </button>
-          <button class="tab" type="button" data-mode="bulk">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-            <span>Bulk Upload</span>
-          </button>
-        </div>
-
         <div id="single-mode" class="mode-panel">
-          <div class="input-group">
-            <label for="company">
-              Company Name <span class="req">*</span>
-            </label>
-            <div class="input-wrapper">
-              <svg class="field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
-              <input id="company" name="company" placeholder="e.g. Sleek, Starbucks, Apple Store" autocomplete="organization">
-            </div>
-          </div>
-
-          <div class="input-group">
-            <label for="location">
-              Location / Address <span class="opt">Optional</span>
-            </label>
-            <div class="input-wrapper">
-              <svg class="field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-              <input id="location" name="location" placeholder="e.g. 160 Robinson Rd, Singapore 068914" autocomplete="street-address">
-            </div>
-          </div>
+          <label>Company name
+            <input id="company" name="company" placeholder="e.g. Ascentium" autocomplete="organization">
+          </label>
+          <label>Location <span>optional</span>
+            <input name="location" placeholder="e.g. Singapore 049315" autocomplete="street-address">
+          </label>
         </div>
-
         <div id="bulk-mode" class="mode-panel" hidden>
           <label class="dropzone" id="dropzone" for="file">
             <input id="file" name="file" type="file" accept=".csv,.xlsx">
-            <div class="dropzone-icon">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-            </div>
-            <strong id="file-label">Drag & drop your CSV or Excel file</strong>
-            <span class="dropzone-sub">Supports <code>.csv</code> and <code>.xlsx</code> spreadsheets</span>
-            <span class="dropzone-req">Required column: <code>company</code> &bull; Optional: <code>location</code></span>
+            <strong id="file-label">Choose CSV or Excel file</strong>
+            <small>Columns: <code>company</code> required, <code>location</code> optional</small>
           </label>
         </div>
-
-        <div class="form-actions">
-          <button type="submit" id="start" class="btn-primary">
-            <span class="btn-text">Extract Reviews</span>
-            <svg class="btn-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-          </button>
+        <div class="actions">
+          <button type="submit" id="start">Scrape reviews</button>
         </div>
       </form>
-
-      <!-- Realtime Engine Dashboard -->
-      <aside class="dashboard-card">
-        <div class="card-header">
-          <span class="header-label">Extraction Pipeline</span>
-          <div class="status-pill" id="status-pill">
-            <span class="status-indicator" id="status-dot"></span>
-            <strong id="status">Ready</strong>
-          </div>
+      <aside class="status-panel">
+        <div class="status-line"><span>Status</span><strong id="status">Ready</strong></div>
+        <div class="progress"><span id="progress"></span></div>
+        <p id="message">Chrome opens locally while reviews are being collected.</p>
+        <div class="counts">
+          <div><span>Companies</span><strong id="rows">-</strong></div>
+          <div><span>Matched</span><strong id="matched">-</strong></div>
+          <div><span>Reviews</span><strong id="reviews">-</strong></div>
         </div>
-
-        <div class="progress-track">
-          <div class="progress-fill" id="progress"></div>
-        </div>
-
-        <div class="message-box">
-          <p id="message">Configure your target company and click Extract Reviews to launch.</p>
-        </div>
-
-        <div class="metrics-grid">
-          <div class="metric-item">
-            <span class="metric-label">Companies</span>
-            <strong class="metric-val" id="rows">-</strong>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">Matched</span>
-            <strong class="metric-val" id="matched">-</strong>
-          </div>
-          <div class="metric-item highlight">
-            <span class="metric-label">Reviews Extracted</span>
-            <strong class="metric-val" id="reviews">-</strong>
-          </div>
-        </div>
-
-        <div id="incomplete" class="warning-alert" hidden></div>
-
-        <a id="reviews-download" class="btn-download" href="#" hidden>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-          <span>Download Reviews CSV</span>
-        </a>
+        <p id="incomplete" class="incomplete" hidden></p>
+        <a id="reviews-download" class="download" href="#" hidden>Download reviews CSV</a>
       </aside>
     </section>
 
     <!-- Preview Section -->
-    <section id="preview-section" class="preview-card" hidden>
+    <section id="preview-section" class="preview-section" hidden>
       <div class="preview-header">
-        <div class="preview-title-group">
-          <div class="preview-badge">Live Preview</div>
-          <h2 class="preview-title">Extracted Review Dataset</h2>
-          <p id="preview-subtitle" class="preview-subtitle">Verify extracted data rows before downloading the full CSV file</p>
+        <div>
+          <h2 class="preview-title">Scraped Reviews Preview</h2>
+          <p id="preview-subtitle" class="preview-subtitle">Check the extracted reviews below before downloading</p>
         </div>
-        <a id="preview-download" class="btn-download-secondary" href="#" hidden>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-          <span>Download Complete CSV</span>
-        </a>
+        <a id="preview-download" class="download preview-download-btn" href="#" hidden>Download reviews CSV</a>
       </div>
-
-      <div class="table-container">
-        <table class="data-table">
+      <div class="preview-table-wrapper">
+        <table class="preview-table">
           <thead>
             <tr>
-              <th style="width: 50px;">#</th>
-              <th style="width: 170px;">Company / Place</th>
-              <th style="width: 150px;">Reviewer</th>
-              <th style="width: 95px;">Rating</th>
+              <th style="width: 45px;">#</th>
+              <th style="width: 140px;">Company</th>
+              <th style="width: 130px;">Reviewer</th>
+              <th style="width: 80px;">Rating</th>
               <th style="width: 110px;">Date</th>
-              <th>Review Description</th>
-              <th style="width: 260px;">Owner Response</th>
+              <th>Review Text</th>
+              <th>Owner Reply</th>
             </tr>
           </thead>
           <tbody id="preview-tbody">
@@ -210,35 +81,13 @@
       </div>
     </section>
 
-    <!-- CSV Schema Section -->
-    <section class="schema-card">
-      <div class="schema-header">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-        <strong>Exported CSV Data Schema</strong>
-      </div>
-      <div class="schema-pills">
-        <span class="pill">Company</span>
-        <span class="pill">Address</span>
-        <span class="pill">Match confidence</span>
-        <span class="pill">Google review count</span>
-        <span class="pill">Extracted reviews</span>
-        <span class="pill">Reviewer</span>
-        <span class="pill">Rating</span>
-        <span class="pill">Review text</span>
-        <span class="pill">Date</span>
-        <span class="pill">Owner reply</span>
-        <span class="pill">Replied by</span>
-        <span class="pill">Reply date</span>
-      </div>
+    <section class="csv-fields">
+      <strong>CSV includes</strong>
+      <span>Company</span><span>Address</span><span>Match confidence</span><span>Google review count</span>
+      <span>Extracted reviews</span><span>Reviewer</span><span>Rating</span><span>Review</span><span>Date</span>
+      <span>Owner reply</span><span>Replied by</span><span>Reply date</span>
     </section>
   </main>
-
-  <footer class="footer">
-    <div class="footer-content">
-      <span>Maps Review Extractor Kit &bull; Built with Python, Selenium & Flask</span>
-    </div>
-  </footer>
-
   <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 </html>
